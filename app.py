@@ -26,13 +26,36 @@ handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
+SUPPORTED_LANGUAGE_MAP = {
+    "th": "泰文",
+    "vn": "越南文",
+    "tw": "繁體中文",
+    "en": "英文",
+    "id": "印尼文",
+}
+
 def GPT_response(text):
-    # 接收回應
-    response = openai.Completion.create(model="gpt-3.5-turbo-instruct", prompt=text, temperature=0.5, max_tokens=500)
-    print(response)
-    # 重組回應
-    answer = response['choices'][0]['text'].replace('。','')
+    answer = text
+    country = text[:5]
+    country_list = country.split("-")
+    if (
+        len(country_list) == 2
+        and (source_language := SUPPORTED_LANGUAGE_MAP.get(country_list[0]))
+        and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
+    ):
+        format_text = f"幫我把以下文字從{source_language}轉成{target_language} {text[5:]}"
+        response = openai.Completion.create(
+            model="gpt-3.5-turbo-instruct",
+            prompt=format_text,
+            temperature=0.5,
+            max_tokens=500,
+        )
+        print(response)
+        # 重組回應
+        answer = response["choices"][0]["text"].replace("。", "")
+
     return answer
+
 
 
 # 監聽所有來自 /callback 的 Post Request
