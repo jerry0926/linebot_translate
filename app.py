@@ -52,7 +52,8 @@ def GPT_response(text):
         )
         print(response)
         # 重組回應
-        answer = response["choices"][0]["text"].replace("。", "")
+        format_answer = response["choices"][0]["text"].replace("。", "")
+        answer = format_answer.split("\n\n")[1]
 
     return answer
 
