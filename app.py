@@ -35,7 +35,7 @@ SUPPORTED_LANGUAGE_MAP = {
 }
 
 def GPT_response(source_language, target_language, text):
-    format_text = f"幫我把以下文字從{source_language}轉成{target_language}\n{text}"
+    format_text = f"幫我把以下文字從{source_language}翻譯成{target_language}:\n{text}"
     response = openai.Completion.create(
         model="gpt-3.5-turbo-instruct",
         prompt=format_text,
