@@ -57,7 +57,7 @@ def GPT_response(source_language, target_language, text, name):
     print(response)
     # 重組回應
     # format_answer = response["choices"][0]["text"].replace("。", "")
-    answer = response.choices[0].message.content
+    answer = response.choices[0].message.content.replace("。", "")
     if(name != ''):
         return f"{name}:\n{answer}"
     return answer
