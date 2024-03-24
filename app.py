@@ -34,7 +34,7 @@ SUPPORTED_LANGUAGE_MAP = {
     "id": "印尼文",
 }
 
-def GPT_response(source_language, target_language, text):
+def GPT_response(source_language, target_language, text, name):
     format_text = f"幫我把以下文字從{source_language}翻譯成{target_language}:\n{text}"
     response = openai.Completion.create(
         model="gpt-3.5-turbo-instruct",
@@ -46,7 +46,7 @@ def GPT_response(source_language, target_language, text):
     # 重組回應
     format_answer = response["choices"][0]["text"].replace("。", "")
     answer = format_answer.split("\n\n")[1]
-    return answer
+    return f"{name}: {answer}"
 
 
 
@@ -70,11 +70,6 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message.text
-    print(event)
-    # uid = event.joined.members[0].user_id
-    # gid = event.source.group_id
-    # profile = line_bot_api.get_group_member_profile(gid, uid)
-    # name = profile.display_name
     try:
         country = msg[:5]
         country_list = country.split("-")
@@ -83,7 +78,12 @@ def handle_message(event):
             and (source_language := SUPPORTED_LANGUAGE_MAP.get(country_list[0]))
             and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
         ):
-            GPT_answer = GPT_response(source_language, target_language, msg[6:])
+            uid = event.source.userId
+            gid = event.source.groupId
+            profile = line_bot_api.get_group_member_profile(gid, uid)
+            print(profile)
+            name = profile.display_name
+            GPT_answer = GPT_response(source_language, target_language, msg[6:], name)
             print(GPT_answer)
             line_bot_api.reply_message(event.reply_token, TextSendMessage(GPT_answer))
         else: 
