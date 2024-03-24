@@ -69,6 +69,7 @@ def callback():
 # 處理訊息
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    print(event)
     msg = event.message.text
     try:
         country = msg[:5]
@@ -78,7 +79,6 @@ def handle_message(event):
             and (source_language := SUPPORTED_LANGUAGE_MAP.get(country_list[0]))
             and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
         ):
-            print(event)
             uid = event.source.user_id
             print(uid)
             gid = event.source.group_id
@@ -97,7 +97,7 @@ def handle_message(event):
 
 @handler.add(PostbackEvent)
 def handle_message(event):
-    print(event.postback.data)
+    print(event)
 
         
 import os
