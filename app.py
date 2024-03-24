@@ -78,8 +78,9 @@ def handle_message(event):
             and (source_language := SUPPORTED_LANGUAGE_MAP.get(country_list[0]))
             and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
         ):
-            print(event.source)
-            uid = event.source.userId
+            print(event)
+            uid = event.source["userId"]
+            print(uid)
             gid = event.source.groupId
             profile = line_bot_api.get_group_member_profile(gid, uid)
             name = profile.display_name
