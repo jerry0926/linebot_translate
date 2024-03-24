@@ -11,7 +11,7 @@ from linebot.models import *
 #======python的函數庫==========
 import tempfile, os
 import datetime
-import openai
+from openai import OpenAI
 import time
 import traceback
 #======python的函數庫==========
@@ -23,7 +23,10 @@ line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 # Channel Secret
 handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 # OPENAI API Key初始化設定
-openai.api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI(
+    # This is the default and can be omitted
+    api_key= os.getenv('OPENAI_API_KEY')
+)
 
 
 SUPPORTED_LANGUAGE_MAP = {
@@ -43,16 +46,19 @@ def GPT_response(text):
         and (source_language := SUPPORTED_LANGUAGE_MAP.get(country_list[0]))
         and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
     ):
-        format_text = f"幫我把以下文字從{source_language}轉成{target_language} {text[5:]}"
-        response = openai.Completion.create(
-            model="gpt-3.5-turbo-instruct",
-            prompt=format_text,
-            temperature=0.5,
-            max_tokens=500,
+        format_text = f"幫我把以下文字從{source_language}轉成{target_language}\n{text[6:]}"
+        response = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": format_text,
+                }
+            ],
+            model="gpt-3.5-turbo",
         )
         print(response)
         # 重組回應
-        answer = response["choices"][0]["text"].replace("。", "")
+        answer = response.choices[0].message.content
 
     return answer
 
