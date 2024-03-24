@@ -56,8 +56,8 @@ def GPT_response(source_language, target_language, text, name):
         )
     print(response)
     # 重組回應
-    format_answer = response["choices"][0]["text"].replace("。", "")
-    answer = format_answer.split("\n\n")[1]
+    # format_answer = response["choices"][0]["text"].replace("。", "")
+    answer = response.choices[0].message.content
     if(name != ''):
         return f"{name}:\n{answer}"
     return answer
@@ -94,8 +94,8 @@ def handle_message(event):
             and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
         ):
             name = ''
-            if((uid := event.source.user_id) and (gid := event.source.group_id)):
-                profile = line_bot_api.get_group_member_profile(gid, uid)
+            if(event.source__contains__('group_id')):
+                profile = line_bot_api.get_group_member_profile(event.source.group_id, event.source.user_id)
                 name = profile.display_name
             GPT_answer = GPT_response(source_language, target_language, msg[6:], name)
             print(GPT_answer)
