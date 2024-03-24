@@ -94,7 +94,7 @@ def handle_message(event):
             and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
         ):
             name = ''
-            if(event.source__contains__('group_id')):
+            if(event.source.__contains__('group_id')):
                 profile = line_bot_api.get_group_member_profile(event.source.group_id, event.source.user_id)
                 name = profile.display_name
             GPT_answer = GPT_response(source_language, target_language, msg[6:], name)
