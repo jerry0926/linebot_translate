@@ -34,27 +34,18 @@ SUPPORTED_LANGUAGE_MAP = {
     "id": "印尼文",
 }
 
-def GPT_response(text):
-    answer = text
-    country = text[:5]
-    country_list = country.split("-")
-    if (
-        len(country_list) == 2
-        and (source_language := SUPPORTED_LANGUAGE_MAP.get(country_list[0]))
-        and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
-    ):
-        format_text = f"幫我把以下文字從{source_language}轉成{target_language}\n{text[6:]}"
-        response = openai.Completion.create(
-            model="gpt-3.5-turbo-instruct",
-            prompt=format_text,
-            temperature=0.5,
-            max_tokens=500
-        )
-        print(response)
-        # 重組回應
-        format_answer = response["choices"][0]["text"].replace("。", "")
-        answer = format_answer.split("\n\n")[1]
-
+def GPT_response(source_language, target_language, text):
+    format_text = f"幫我把以下文字從{source_language}轉成{target_language}\n{text}"
+    response = openai.Completion.create(
+        model="gpt-3.5-turbo-instruct",
+        prompt=format_text,
+        temperature=0.5,
+        max_tokens=500
+    )
+    print(response)
+    # 重組回應
+    format_answer = response["choices"][0]["text"].replace("。", "")
+    answer = format_answer.split("\n\n")[1]
     return answer
 
 
@@ -80,9 +71,18 @@ def callback():
 def handle_message(event):
     msg = event.message.text
     try:
-        GPT_answer = GPT_response(msg)
-        print(GPT_answer)
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(GPT_answer))
+        country = msg[:5]
+        country_list = country.split("-")
+        if (
+            len(country_list) == 2
+            and (source_language := SUPPORTED_LANGUAGE_MAP.get(country_list[0]))
+            and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
+        ):
+            GPT_answer = GPT_response(source_language, target_language, msg[6:])
+            print(GPT_answer)
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(GPT_answer))
+        else: 
+            print('不需要翻譯')
     except:
         print(traceback.format_exc())
         line_bot_api.reply_message(event.reply_token, TextSendMessage('你所使用的OPENAI API key額度可能已經超過，請於後台Log內確認錯誤訊息'))
