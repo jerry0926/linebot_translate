@@ -46,7 +46,10 @@ def GPT_response(source_language, target_language, text, name):
     # 重組回應
     format_answer = response["choices"][0]["text"].replace("。", "")
     answer = format_answer.split("\n\n")[1]
-    return f"{name}: {answer}"
+    if(name != ''):
+        return f"{name}:\n{answer}"
+    return answer
+    
 
 
 
@@ -69,7 +72,6 @@ def callback():
 # 處理訊息
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    print(event)
     msg = event.message.text
     try:
         country = msg[:5]
@@ -79,12 +81,10 @@ def handle_message(event):
             and (source_language := SUPPORTED_LANGUAGE_MAP.get(country_list[0]))
             and (target_language := SUPPORTED_LANGUAGE_MAP.get(country_list[1]))
         ):
-            uid = event.source.user_id
-            print(uid)
-            gid = event.source.group_id
-            print(gid)
-            profile = line_bot_api.get_group_member_profile(gid, uid)
-            name = profile.display_name
+            name = ''
+            if((uid := event.source.user_id) and (gid := event.source.group_id)):
+                profile = line_bot_api.get_group_member_profile(gid, uid)
+                name = profile.display_name
             GPT_answer = GPT_response(source_language, target_language, msg[6:], name)
             print(GPT_answer)
             line_bot_api.reply_message(event.reply_token, TextSendMessage(GPT_answer))
